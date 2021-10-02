@@ -1,0 +1,27 @@
+name: PR
+on:
+  pull_request:
+    branches:
+        - main
+jobs:
+  check_commit_in_develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: source branch name
+        run: |
+          echo ${GITHUB_HEAD_REF}
+      - name: desitination branch name
+        run: |
+          echo ${GITHUB_BASE_REF}
+      - name: Hash commit
+        run: |
+          echo ${GITHUB_SHA}
+      - name: Check if Hash commit in develop branch
+        run: |
+          if [ 0 -eq $(git branch --contains $GITHUB_SHA|grep -c origin/develop) ];
+             then
+                 echo "${GITHUB_SHA} not found in origin/develop. Aborting script"
+                 exit 1
+          fi
