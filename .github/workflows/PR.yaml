@@ -5,7 +5,8 @@ jobs:
   check_commit_in_develop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        shell: bash
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: branch name
         run: |
           echo ${{ github.ref }}
