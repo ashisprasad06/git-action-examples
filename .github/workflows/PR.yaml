@@ -1,14 +1,13 @@
 name: PR
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
+  pull_request
 
 jobs:
   check_commit_in_develop:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        shell: bash
+        run: |
+          echo ${{ github.ref }}
