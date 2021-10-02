@@ -1,7 +1,8 @@
 name: PR
 on:
   pull_request:
-    - main
+    branches:
+        - main
 jobs:
   check_commit_in_develop:
     runs-on: ubuntu-latest
