@@ -1,11 +1,7 @@
 name: PR
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
+  pull_request
 
 jobs:
   check_commit_in_develop:
