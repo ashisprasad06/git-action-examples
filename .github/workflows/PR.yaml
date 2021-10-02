@@ -7,6 +7,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: branch name
+      - name: source branch name
         run: |
-          echo ${GITHUB_REF##*/}
+          echo ${GITHUB_HEAD_REF}
+      - name: desitination branch name
+        run: |
+          echo ${GITHUB_BASE_REF}
