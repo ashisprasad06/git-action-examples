@@ -1,0 +1,14 @@
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+
+jobs:
+  check_commit_in_develop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
