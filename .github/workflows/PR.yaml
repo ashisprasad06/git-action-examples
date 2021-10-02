@@ -23,5 +23,5 @@ jobs:
           if [ 0 -eq $(git branch --contains $GITHUB_SHA|grep -c origin/develop) ];
              then
                  echo "${GITHUB_SHA} not found in origin/develop. Aborting script"
-                 exit 0
+                 exit 1
           fi
