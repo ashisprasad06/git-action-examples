@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
         - main
+        - develop
 jobs:
   check_commit_in_develop:
     runs-on: ubuntu-latest
@@ -20,8 +21,13 @@ jobs:
           echo ${GITHUB_SHA}
       - name: Check if Hash commit in develop branch
         run: |
-          if [ 0 -eq $(git branch --contains $GITHUB_SHA|grep -c origin/develop) ];
+          if [ ${GITHUB_BASE_REF} == 'develop' ];
+            then
+                echo "This is a develop branch. exiting the check"
+                exit 0
+          elif [ 0 -eq $(git branch --contains $GITHUB_SHA|grep -c develop) ];
              then
-                 echo "${GITHUB_SHA} not found in origin/develop. Aborting script"
+                 echo "${GITHUB_SHA} not found in develop. Aborting the merge"
+                 echo "Please commit the change to develop branch and wait for UAT completion before you merge the changes to master branch"
                  exit 1
           fi
