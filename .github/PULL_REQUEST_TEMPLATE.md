@@ -6,7 +6,7 @@
 ## Description
 <!-- Please describe what you have changed or added -->
 
-## Please specify UAT complete date and develop branch PR link 
+## Please specify UAT completion date and attach develop branch PR link 
 <--- Please give the UAT completion data and develop branch PR link --> 
 
 ## Types of changes
