@@ -1,13 +1,15 @@
+# PR for MAIN BRANCH
 ## Jira
 [GDPLUMTEAM-XXX](https://sainsburys-jira.valiantys.net/browse/GDPLUMTEAM-XXX)
 
 ## Description
 <!-- Please describe what you have changed or added -->
 
-## Please specify the PR link for develop branch?
+## Please specify the PR link for develop branch
 [PR-LINK](https://github.com/git-action-examples/pull/XXX)
 
-## Please specify the UAT completion date ?
+## Please specify the UAT completion details
+<-- Please specify UAT completion date -->
 
 ## Types of changes
 <!-- What types of changes does your code introduce?  -->
