@@ -12,3 +12,8 @@ create table ${database_name}.${table_name} (
     col_e integer,
     col_f integer
 );
+
+create table ${database_name}.${table_name} (
+    col_g integer,
+    col_h integer
+);
