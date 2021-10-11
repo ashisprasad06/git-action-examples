@@ -11,11 +11,11 @@ jobs:
         uses: actions/checkout@v2
       - name: create release branch
         run : |
-          echo "Creating the release branch from the feature branch $GITHUB_HEAD_REF"
+          echo "Creating the release branch from the feature branch ${GITHUB_HEAD_REF}"
           JIRA_TICKET_NUMBER=`echo ${GITHUB_HEAD_REF}|awk -F"/" '{print $2}'`
           RELEASE_BRANCH_NAME='release/${JIRA_TICKET_NUMBER}'
           echo "Checking if the release branch ${RELEASE_BRANCH_NAME} already exists in remote"
-          if [ (git ls-remote --heads origin ${RELEASE_BRANCH_NAME}|wc -l) == 1 ];
+          if [ $(git ls-remote --heads origin ${RELEASE_BRANCH_NAME}|wc -l) == 1 ];
             then
                 echo "Branch already exist in remote. Do nothing"
                 exit 0
