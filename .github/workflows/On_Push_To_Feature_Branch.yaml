@@ -3,8 +3,9 @@ on:
   push:
     branches:
       - feature/**
+      - features/**
 jobs:
-  check_commit_in_develop:
+  create_release_branch_on_push:
     runs-on: ubuntu-latest
     steps:
       - name: checkout

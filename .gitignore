@@ -18,4 +18,4 @@ bin-release/
 # information for Eclipse / Flash Builder.
 .idea/**
 .github/PULL_REQUEST_TEMPLATE.md
-.github/workflows/PR.yaml
+.github/workflows/On_Push_To_Feature_Branch.yaml
