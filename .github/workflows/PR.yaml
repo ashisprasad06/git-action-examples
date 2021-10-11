@@ -2,7 +2,7 @@ name: PR
 on:
   push:
     branches:
-      - features/**
+      - feature/**
 jobs:
   check_commit_in_develop:
     runs-on: ubuntu-latest
