@@ -22,8 +22,7 @@ jobs:
             else
                 echo "The release branch $RELEASE_BRANCH_NAME does not exists in remote. Hence creating the new branch from master"
                 git fetch origin main
-                git checkout origin/main
-                git branch -b $RELEASE_BRANCH_NAME
+                git switch -c $RELEASE_BRANCH_NAME
                 git push origin $RELEASE_BRANCH_NAME
                 echo "The new branch has been created. Please raise PR against this branch to merge changes to Pre-Prod"
           fi
