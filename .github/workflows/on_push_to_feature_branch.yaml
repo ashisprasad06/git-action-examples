@@ -1,0 +1,29 @@
+name: PUSH TO FEATURE BRANCH
+on:
+  push:
+    branches:
+      - feature/**
+jobs:
+  create_release_branch_on_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: create release branch
+        run : |
+          feature_branch_name=$(echo ${GITHUB_REF#refs/heads/})
+          echo "Creating the release branch from the feature branch $feature_branch_name"
+          JIRA_TICKET_NUMBER=$(echo $feature_branch_name | awk -F"/" '{print $2}')
+          RELEASE_BRANCH_NAME="release/$(echo $JIRA_TICKET_NUMBER)"
+          echo "Checking if the release branch $RELEASE_BRANCH_NAME already exists in remote"
+          if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 1 ];
+            then
+                echo "Branch already exist in remote. Do nothing"
+                exit 0
+            else
+                echo "The release branch $RELEASE_BRANCH_NAME does not exists in remote. Hence creating the new branch from master"
+                git fetch origin main
+                git switch -c $RELEASE_BRANCH_NAME
+                git push origin $RELEASE_BRANCH_NAME
+                echo "The new branch has been created. Please raise PR against this branch to merge changes to Pre-Prod"
+          fi
