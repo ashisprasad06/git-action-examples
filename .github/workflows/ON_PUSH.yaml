@@ -19,8 +19,8 @@ jobs:
         run : |
           branch_name=$(echo ${GITHUB_REF#refs/heads/})
           echo "Will create release branch from master against which you will raise PR to deploy to preprod"
-          echo "Creating the release branch from the feature branch $feature_branch_name"
-          JIRA_TICKET_NUMBER=$(echo $feature_branch_name | awk -F"/" '{print $2}')
+          echo "Creating the release branch from the feature branch $branch_name"
+          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
           RELEASE_BRANCH_NAME="release/$(echo $JIRA_TICKET_NUMBER)"
           if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
             then
