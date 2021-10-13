@@ -1,11 +1,15 @@
-name: PR ON RELEASE BRANCH
+name: PR
 on:
   pull_request:
     branches:
       - release/**
+      - Release/**
+      - RELEASE/**
+      - main
 jobs:
-  check_if_feature_branch_is_correct:
+  pr_on_release_branch:
     runs-on: ubuntu-latest
+    if: $(echo ${GITHUB_BASE_REF}|grep -i -c "release") == 1
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -30,5 +34,21 @@ jobs:
           if [ $expected_tgt_branch_name != $tgt_branch_name ];
             then
               echo "It looks the expected target is not correct. Please close this PR and raise another PR with correct target"
+              exit 1
+          fi
+  pr_on_main_branch:
+    runs-on: ubuntu-latest
+    if: ${GITHUB_BASE_REF} == "main"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: validate source branch
+        run : |
+          src_branch_name=${GITHUB_HEAD_REF}
+          if [ $(echo $src_branch_name | grep -c 'release/') != 1 ];
+            then
+              echo "Looks like you are trying a PR from branch other than release/.This action is blocked\n"
+              echo "Hence failing this check. Please close this PR"
+              echo "Please select appropriate release branch which should look like this release/**"
               exit 1
           fi
