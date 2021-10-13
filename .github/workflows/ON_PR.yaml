@@ -9,7 +9,7 @@ on:
 jobs:
   pr_on_release_branch:
     runs-on: ubuntu-latest
-    if: $(echo ${GITHUB_BASE_REF}|grep -i -c "release") == 1
+    if: contains(github.ref, 'release')
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
           fi
   pr_on_main_branch:
     runs-on: ubuntu-latest
-    if: ${GITHUB_BASE_REF} == "main"
+    if: contains(github.ref, 'refs/heads/main')
     steps:
       - name: checkout
         uses: actions/checkout@v2
