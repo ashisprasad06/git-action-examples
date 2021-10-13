@@ -1,0 +1,34 @@
+name: PR ON RELEASE BRANCH
+on:
+  pull_request:
+    branches:
+      - release/**
+jobs:
+  check_if_feature_branch_is_correct:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: check naming convention of source
+        run : |
+          src_branch_name=${GITHUB_HEAD_REF}
+          if [ $(echo $src_branch_name | grep -c 'feature/') != 1 ];
+            then
+              echo "Looks like the branch name does not follow naming convention standard as source to merge into release branch \n"
+              echo "Hence aborting this check. Please close this PR and either create new branch or rename existing new branch and raise new PR\n"
+              echo "Please follow naming standard of feature/<jira_ticket_number>"
+              exit 1
+          fi
+      - name: validate source and destination
+        run : |
+          src_branch_name=${GITHUB_HEAD_REF}
+          tgt_branch_name=${GITHUB_BASE_REF}
+
+          src_jira_ticket_num=$(echo $src_branch_name | awk -F"/" '{print $2}')
+          expected_tgt_branch_name="release/$src_jira_ticket_num"
+
+          if [ $expected_tgt_branch_name != $tgt_branch_name ];
+            then
+              echo "It looks the expected target is not correct. Please close this PR and raise another PR with correct target"
+              exit 1
+          fi

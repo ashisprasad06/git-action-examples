@@ -1,9 +1,8 @@
-name: PR
+name: PUSH TO FEATURE BRANCH
 on:
   push:
     branches:
       - feature/**
-      - features/**
 jobs:
   create_release_branch_on_push:
     runs-on: ubuntu-latest
