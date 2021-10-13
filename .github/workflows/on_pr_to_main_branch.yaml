@@ -1,0 +1,21 @@
+name: PR ON MAIN BRANCH
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  check_if_source_branch_is_correct:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: validate source branch
+        run : |
+          src_branch_name=${GITHUB_HEAD_REF}
+          if [ $(echo $src_branch_name | grep -c 'release/') != 1 ];
+            then
+              echo "Looks like you are trying a PR from branch other than release/.This action is blocked\n"
+              echo "Hence failing this check. Please close this PR"
+              echo "Please select appropriate release branch which should look like this release/**"
+              exit 1
+          fi
