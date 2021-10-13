@@ -3,3 +3,4 @@ select * from tableB;
 select * from tableC;
 select * from tableD;
 select * from tableE;
+select * from tableK;
