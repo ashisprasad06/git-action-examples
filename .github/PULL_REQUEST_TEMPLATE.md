@@ -1,5 +1,3 @@
-# PR for DEVELOP BRANCH
-
 ## Jira
 [GDPLUMTEAM-XXX](https://sainsburys-jira.valiantys.net/browse/GDPLUMTEAM-XXX)
 
