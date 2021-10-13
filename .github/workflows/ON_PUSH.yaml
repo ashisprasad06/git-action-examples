@@ -9,7 +9,7 @@ on:
 jobs:
   on_push_to_feature:
     runs-on: ubuntu-latest
-    if: contains(github.event.push.payload.ref, 'feature')
+    if: contains(github.ref, 'feature')
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
           fi
   publish_release_from_main:
     runs-on: ubuntu-latest
-    if: contains(github.event.push.payload.ref, 'main')
+    if: $${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Create draft release
         id: create_draft_release
