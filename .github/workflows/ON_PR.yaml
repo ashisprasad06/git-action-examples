@@ -9,7 +9,7 @@ on:
 jobs:
   pr_on_release_branch:
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'release')
+    if: contains(github.head_ref, 'release')
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
           fi
   pr_on_main_branch:
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/heads/main')
+    if: contains(github.base_ref, 'main')
     steps:
       - name: checkout
         uses: actions/checkout@v2

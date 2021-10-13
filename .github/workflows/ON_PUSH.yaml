@@ -31,7 +31,7 @@ jobs:
           fi
   publish_release_from_main:
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/heads/main')
+    if: contains(github.ref, 'main')
     steps:
       - name: Create draft release
         id: create_draft_release
