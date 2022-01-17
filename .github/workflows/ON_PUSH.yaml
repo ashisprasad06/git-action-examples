@@ -22,7 +22,7 @@ jobs:
           JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
           echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
 
-          RELEASE_BRANCH_NAME="preprod/$(echo $branch_name)"
+          RELEASE_BRANCH_NAME="preprod/$(echo $JIRA_TICKET_NUMBER)"
           echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
 
   on_push_to_feature:
@@ -51,10 +51,20 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_branch: ${{ needs.runtime_variables.outputs.feature_branch_name }}
           target_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
-          title: Release ${{ needs.runtime_variables.outputs.jira_ticket_numer }} to pre-production
+          title: Pre-Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
           template: .github/PULL_REQUEST_TEMPLATE.md
           draft: true
           get_diff: true
+      - name: Create draft PR for Productuin
+          uses: devops-infra/action-pull-request@v0.4.2
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            source_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
+            target_branch: main
+            title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
+            template: .github/PULL_REQUEST_TEMPLATE.md
+            draft: true
+            get_diff: true
   publish_release_from_main:
     needs: runtime_variables
     runs-on: ubuntu-latest
