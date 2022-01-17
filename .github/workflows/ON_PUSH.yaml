@@ -13,7 +13,7 @@ jobs:
         with:
           ref: main
       - name: create output
-        id:list_outputs
+        id: list_outputs
         outputs:
           jira_ticket_numer: ${{ steps.jira_ticket.outputs.jira_ticket_numer }}
           feature_branch_name: $(echo ${GITHUB_REF#refs/heads/})
