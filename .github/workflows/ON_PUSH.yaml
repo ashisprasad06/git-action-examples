@@ -4,11 +4,26 @@ on:
     branches:
       - feature/**
 jobs:
-  on_push_to_feature:
+  runtime_variables:
     outputs:
-      jira_ticket_numer: ${{ steps.jira_ticket.outputs.jira_ticket_numer }}
-      feature_branch_name: ${{ steps.current_branch.outputs.feature_branch_name }}
-      preprod_branch_name: ${{ steps.preprod_branch.outputs.preprod_branch_name }}
+      jira_ticket_numer: ${{ steps.runtime_variables.outputs.jira_ticket_numer }}
+      feature_branch_name: ${{ steps.runtime_variables.outputs.feature_branch_name }}
+      preprod_branch_name: ${{ steps.runtime_variables.outputs.preprod_branch_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Get runtime variables
+          id: runtime_variables
+          run: |
+            branch_name=$(echo ${GITHUB_REF#refs/heads/})
+            echo "::set-output name=feature_branch_name::$branch_name"
+            JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
+            echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
+            RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
+            echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
+  on_push_to_feature:
+    needs: runtime_variables
     runs-on: ubuntu-latest
     if: contains(github.ref, 'feature')
     steps:
@@ -16,22 +31,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-      - name: Get current branch
-        id: current_branch
-        run: |
-          branch_name=$(echo ${GITHUB_REF#refs/heads/})
-          echo "::set-output name=feature_branch_name::$branch_name"
-      - name: Get Jira Ticket
-        id: jira_ticket
-        run: |
-          branch_name=${{ outputs.feature_branch_name }}
-          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
-          echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
       - name: create preprod branch
-        id: preprod_branch
         run : |
-          RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
-          echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
+          RELEASE_BRANCH_NAME="preprod/{{ runtime_variables.outputs.jira_ticket_numer }}"
           echo "Checking $RELEASE_BRANCH_NAME existing or not"
           if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
             then
@@ -44,9 +46,9 @@ jobs:
         uses: devops-infra/action-pull-request@v0.4.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: {{ outputs.feature_branch_name }}
-          target_branch: {{ outputs.preprod_branch_name }}
-          title: Release {{ outputs.jira_ticket_numer }} to pre-production
+          source_branch: {{ runtime_variables.outputs.feature_branch_name }}
+          target_branch: {{ runtime_variables.outputs.preprod_branch_name }}
+          title: Release {{ runtime_variables.outputs.jira_ticket_numer }} to pre-production
           template: .github/PULL_REQUEST_TEMPLATE.md
           draft: true
           get_diff: true
