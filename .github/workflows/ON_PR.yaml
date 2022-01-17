@@ -27,7 +27,7 @@ jobs:
           tgt_branch_name=${GITHUB_BASE_REF}
 
           src_jira_ticket_num=$(echo $src_branch_name | awk -F"/" '{print $2}')
-          expected_tgt_branch_name="feature/$src_jira_ticket_num"
+          expected_tgt_branch_name="preprod/$src_jira_ticket_num"
 
           if [ $expected_tgt_branch_name != $tgt_branch_name ];
             then
