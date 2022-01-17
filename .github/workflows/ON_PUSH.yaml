@@ -16,16 +16,21 @@ jobs:
         id: list_outputs
         outputs:
           jira_ticket_numer: ${{ steps.jira_ticket.outputs.jira_ticket_numer }}
-          feature_branch_name: $(echo ${GITHUB_REF#refs/heads/})
-          preprod_branch_name: ${{ steps.create_preprod_branch.outputs.preprod_branch_name }}
+          feature_branch_name: ${{ steps.current_branch.outputs.feature_branch_name }}
+          preprod_branch_name: ${{ steps.preprod_branch.outputs.preprod_branch_name }}
+      - name: Get current branch
+        id: current_branch
+        run: |
+          branch_name=$(echo ${GITHUB_REF#refs/heads/})
+          echo "::set-output name=feature_branch_name::$branch_name"
       - name: Get Jira Ticket
         id: jira_ticket
         run: |
-          branch_name=$(echo ${GITHUB_REF#refs/heads/})
+          branch_name=${{ list_outputs.outputs.feature_branch_name }}
           JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
           echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
       - name: create preprod branch
-        id: create_preprod_branch
+        id: preprod_branch
         run : |
           RELEASE_BRANCH_NAME="preprod/{{ list_outputs.outputs.jira_ticket_numer }}"
           echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
