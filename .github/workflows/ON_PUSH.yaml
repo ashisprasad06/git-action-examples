@@ -24,13 +24,13 @@ jobs:
       - name: Get Jira Ticket
         id: jira_ticket
         run: |
-          branch_name=${{ on_push_to_feature.outputs.feature_branch_name }}
+          branch_name=${{ outputs.feature_branch_name }}
           JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
           echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
       - name: create preprod branch
         id: preprod_branch
         run : |
-          RELEASE_BRANCH_NAME="preprod/{{ on_push_to_feature.outputs.jira_ticket_numer }}"
+          RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
           echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
           echo "Checking $RELEASE_BRANCH_NAME existing or not"
           if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
@@ -44,9 +44,9 @@ jobs:
         uses: devops-infra/action-pull-request@v0.4.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: {{ on_push_to_feature.outputs.feature_branch_name }}
-          target_branch: {{ on_push_to_feature.outputs.preprod_branch_name }}
-          title: Release {{ on_push_to_feature.outputs.jira_ticket_numer }} to pre-production
+          source_branch: {{ outputs.feature_branch_name }}
+          target_branch: {{ outputs.preprod_branch_name }}
+          title: Release {{ outputs.jira_ticket_numer }} to pre-production
           template: .github/PULL_REQUEST_TEMPLATE.md
           draft: true
           get_diff: true
