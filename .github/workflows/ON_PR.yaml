@@ -1,11 +1,11 @@
-name: PR
+name: ON PR
 on:
   pull_request:
     branches:
       - preprod/**
       - main
 jobs:
-  pr_on_release_branch:
+  pr_on_preprod_branch:
     runs-on: ubuntu-latest
     if: contains(github.base_ref, 'preprod')
     steps:
