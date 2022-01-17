@@ -56,15 +56,15 @@ jobs:
           draft: true
           get_diff: true
       - name: Create draft PR for Productuin
-          uses: devops-infra/action-pull-request@v0.4.2
-          with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
-            source_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
-            target_branch: main
-            title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
-            template: .github/PULL_REQUEST_TEMPLATE.md
-            draft: true
-            get_diff: true
+        uses: devops-infra/action-pull-request@v0.4.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
+          target_branch: main
+          title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
+          template: .github/PULL_REQUEST_TEMPLATE.md
+          draft: true
+          get_diff: true
   publish_release_from_main:
     needs: runtime_variables
     runs-on: ubuntu-latest
