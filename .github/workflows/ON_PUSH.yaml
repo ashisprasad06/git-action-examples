@@ -14,14 +14,17 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: Get runtime variables
-          id: runtime_variables
-          run: |
-            branch_name=$(echo ${GITHUB_REF#refs/heads/})
-            echo "::set-output name=feature_branch_name::$branch_name"
-            JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
-            echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
-            RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
-            echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
+        id: runtime_variables
+        run: |
+          branch_name=$(echo ${GITHUB_REF#refs/heads/})
+          echo "::set-output name=feature_branch_name::$branch_name"
+
+          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
+          echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
+
+          RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
+          echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
+
   on_push_to_feature:
     needs: runtime_variables
     runs-on: ubuntu-latest
