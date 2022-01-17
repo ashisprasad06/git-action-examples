@@ -3,11 +3,31 @@ on:
   push:
     branches:
       - feature/**
-      - Feature/**
-      - FEATURE/**
-      - main
+      - preprod/**
 jobs:
+  runtime_variables:
+    outputs:
+      jira_ticket_numer: ${{ steps.runtime_variables.outputs.jira_ticket_numer }}
+      feature_branch_name: ${{ steps.runtime_variables.outputs.feature_branch_name }}
+      preprod_branch_name: ${{ steps.runtime_variables.outputs.preprod_branch_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Get runtime variables
+        id: runtime_variables
+        run: |
+          branch_name=$(echo ${GITHUB_REF#refs/heads/})
+          echo "::set-output name=feature_branch_name::$branch_name"
+
+          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
+          echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
+
+          RELEASE_BRANCH_NAME="preprod/$(echo $JIRA_TICKET_NUMBER)"
+          echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
+
   on_push_to_feature:
+    needs: runtime_variables
     runs-on: ubuntu-latest
     if: contains(github.ref, 'feature')
     steps:
@@ -15,13 +35,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-      - name: create release branch
+      - name: create preprod branch
         run : |
-          branch_name=$(echo ${GITHUB_REF#refs/heads/})
-          echo "Will create release branch from master against which you will raise PR to deploy to preprod"
-          echo "Creating the release branch from the feature branch $branch_name"
-          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
-          RELEASE_BRANCH_NAME="release/$(echo $JIRA_TICKET_NUMBER)"
+          RELEASE_BRANCH_NAME=${{ needs.runtime_variables.outputs.preprod_branch_name }}
+          echo "Checking $RELEASE_BRANCH_NAME existing or not"
           if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
             then
                 echo "The release branch $RELEASE_BRANCH_NAME does not exists in remote. Hence creating the new branch from master"
@@ -29,7 +46,49 @@ jobs:
                 git push origin $RELEASE_BRANCH_NAME
                 echo "The new branch has been created. Please raise PR against this branch to merge changes to Pre-Prod"
           fi
-  publish_release_from_main:
+      - name: Create draft PR for Preprod
+        uses: devops-infra/action-pull-request@v0.4.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ needs.runtime_variables.outputs.feature_branch_name }}
+          target_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
+          title: Pre-Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
+          template: .github/PULL_REQUEST_TEMPLATE.md
+          draft: true
+          get_diff: true
+      - name: Create draft PR for Productuin
+        uses: devops-infra/action-pull-request@v0.4.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ needs.runtime_variables.outputs.feature_branch_name }}
+          target_branch: main
+          title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
+          template: .github/PULL_REQUEST_TEMPLATE.md
+          draft: true
+          get_diff: true
+
+  on_push_to_preprod:
+    needs: runtime_variables
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'preprod')
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Create draft PR for Productuin
+        uses: devops-infra/action-pull-request@v0.4.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
+          target_branch: main
+          title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
+          template: .github/PULL_REQUEST_TEMPLATE.md
+          draft: true
+          get_diff: true
+
+  on_push_to_main:
+    needs: runtime_variables
     runs-on: ubuntu-latest
     if: contains(github.ref, 'main')
     steps:
