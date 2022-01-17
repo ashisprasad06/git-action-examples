@@ -9,3 +9,4 @@ select * from tableL;
 select * from tableM;
 select * from tableN;
 select * from tableO;
+select * from tableR;
