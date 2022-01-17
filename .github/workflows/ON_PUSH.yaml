@@ -22,7 +22,7 @@ jobs:
           JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
           echo "::set-output name=jira_ticket_numer::$JIRA_TICKET_NUMBER"
 
-          RELEASE_BRANCH_NAME="preprod/{{ outputs.jira_ticket_numer }}"
+          RELEASE_BRANCH_NAME="preprod/$(echo $branch_name)"
           echo "::set-output name=preprod_branch_name::$RELEASE_BRANCH_NAME"
 
   on_push_to_feature:
@@ -36,7 +36,7 @@ jobs:
           ref: main
       - name: create preprod branch
         run : |
-          RELEASE_BRANCH_NAME="preprod/${{ needs.runtime_variables.outputs.jira_ticket_numer }}"
+          RELEASE_BRANCH_NAME=${{ needs.runtime_variables.outputs.preprod_branch_name }}
           echo "Checking $RELEASE_BRANCH_NAME existing or not"
           if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
             then
@@ -56,6 +56,7 @@ jobs:
           draft: true
           get_diff: true
   publish_release_from_main:
+    needs: runtime_variables
     runs-on: ubuntu-latest
     if: contains(github.ref, 'main')
     steps:
