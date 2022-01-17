@@ -59,7 +59,7 @@ jobs:
         uses: devops-infra/action-pull-request@v0.4.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: ${{ needs.runtime_variables.outputs.preprod_branch_name }}
+          source_branch: ${{ needs.runtime_variables.outputs.feature_branch_name }}
           target_branch: main
           title: Production Release for ${{ needs.runtime_variables.outputs.jira_ticket_numer }}
           template: .github/PULL_REQUEST_TEMPLATE.md
