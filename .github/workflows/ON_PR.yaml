@@ -65,8 +65,7 @@ jobs:
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-
-              if [[ $(echo $file) == "update/"* ]];
+              if [ $(echo $file) == "update/"* ];
                 then
                     Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
                     Pattern_2=$(cat $file|egrep -ic 'use database')
