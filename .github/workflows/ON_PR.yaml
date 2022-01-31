@@ -40,7 +40,7 @@ jobs:
           git merge --no-ff --no-commit ${GITHUB_HEAD_REF}
           if [[ $? -ne 0 ]];
             then
-                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ create_preprod_branch.outputs.preprod_branch }}
+                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ steps.create_preprod_branch.outputs.preprod_branch }}
                 exit 1
           else
             git merge ${GITHUB_HEAD_REF}
