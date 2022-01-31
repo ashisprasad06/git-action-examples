@@ -24,6 +24,6 @@ create table ${database_name}.${legacy_schema}.TBL_5 (
 );
 
 create table ${database_name}.${legacy_schema}.TBL_7 (
-    col_i integer,
-    col_j integer
+    col_x integer,
+    col_y integer
 );
