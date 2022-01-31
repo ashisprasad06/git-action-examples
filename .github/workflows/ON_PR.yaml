@@ -21,7 +21,7 @@ jobs:
         id: create_preprod_branch
         run : |
           SOURCE_BRANCH_NAME=${GITHUB_HEAD_REF}
-          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
+          JIRA_TICKET_NUMBER=$(echo $SOURCE_BRANCH_NAME | awk -F"/" '{print $2}')
           RELEASE_BRANCH_NAME="preprod/$(echo $JIRA_TICKET_NUMBER)"
           echo "::set-output name=preprod_branch::$RELEASE_BRANCH_NAME"
           echo "Checking $RELEASE_BRANCH_NAME existing or not"
@@ -35,15 +35,22 @@ jobs:
           fi
       - name: merge feature to preprod
         run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          git checkout ${GITHUB_HEAD_REF}
+          git pull
           git checkout ${{ steps.create_preprod_branch.outputs.preprod_branch }}
           git pull
           git merge --no-ff --no-commit ${GITHUB_HEAD_REF}
-          if [[ $? -ne 0 ]];
+          return_value=$?
+          echo $return_value
+          if [ $return_value -ne 0 ];
             then
-                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ create_preprod_branch.outputs.preprod_branch }}
+                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ steps.create_preprod_branch.outputs.preprod_branch }}"
                 exit 1
           else
-            git merge ${GITHUB_HEAD_REF}
+            git merge --abort
+            git merge ${GITHUB_HEAD_REF} -m "Auto Commit - Merge ${GITHUB_HEAD_REF} branch"
             git push origin ${{ steps.create_preprod_branch.outputs.preprod_branch }}
           fi
       - name: List of changed files
@@ -58,24 +65,29 @@ jobs:
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-              Pattern_1=$(egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]' $file)
-              Pattern_2=$(egrep -ic 'use database' $file)
-
-              if [ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ];
+              if [ $(echo $file) == "update/"* ];
                 then
-                    echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
-                    exit 1
+                    Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
+                    Pattern_2=$(cat $file|egrep -ic 'use database')
+                    if [[ $Pattern_1 != 0 || $Pattern_2 != 0  ]];
+                      then
+                        echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
+                        exit 1
+                    fi
               fi
             done
       - name: check pre-deploy script
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-              Pattern=$(cat file_2.txt|tr -d "\n"|egrep -ic 'DELETE FROM (.+)LIQUIBASE(.+)')
-              if [ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ];
-                then
+              if [ $(echo $file) == "pre-deploy/"* || $(echo $file) == "post-deploy/"* ];
+              then
+                  Pattern=$(cat $file|tr -d "\n"|egrep -ic 'DELETE FROM (.+)LIQUIBASE(.+)')
+                  if [ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ];
+                  then
                     echo "Found Traces of liquidbase deletion in $file. Hence failing the check"
                     exit 1
+                  fi
               fi
             done
 
