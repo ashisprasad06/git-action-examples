@@ -44,9 +44,9 @@ jobs:
           git merge --no-ff --no-commit ${GITHUB_HEAD_REF}
           return_value=$?
           echo $return_value
-          if [[ $return_value -ne 0 ]];
+          if [ $return_value -ne 0 ];
             then
-                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ steps.create_preprod_branch.outputs.preprod_branch }}
+                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ steps.create_preprod_branch.outputs.preprod_branch }}"
                 git merge --abort
                 exit 1
           else
