@@ -67,10 +67,8 @@ jobs:
             do
               Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
               Pattern_2=$(cat $file|egrep -ic 'use database')
-              echo $Pattern_1
-              echo $Pattern_2
 
-              if [[ $Pattern_1 != 0 || $Pattern_2 != 0 ]];
+              if [[ ($(echo $file) == *".sql" ||  $(echo $file) == *".ddl" ) && ($Pattern_1 != 0 || $Pattern_2 != 0) ]];
                 then
                     echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
                     exit 1
