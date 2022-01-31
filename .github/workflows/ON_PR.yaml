@@ -35,12 +35,17 @@ jobs:
           fi
       - name: merge feature to preprod
         run: |
+          git checkout ${GITHUB_HEAD_REF}
+          git pull
           git checkout ${{ steps.create_preprod_branch.outputs.preprod_branch }}
           git pull
           git merge --no-ff --no-commit ${GITHUB_HEAD_REF}
-          if [[ $? -ne 0 ]];
+          return_value=$?
+          echo $return_value
+          if [[ $return_value -ne 0 ]];
             then
                 echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ steps.create_preprod_branch.outputs.preprod_branch }}
+                git merge --abort
                 exit 1
           else
             git merge ${GITHUB_HEAD_REF}
