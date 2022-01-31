@@ -65,13 +65,16 @@ jobs:
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-              Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
-              Pattern_2=$(cat $file|egrep -ic 'use database')
 
-              if [[ ($(echo $file) == *".sql" ||  $(echo $file) == *".ddl" ) && ($Pattern_1 != 0 || $Pattern_2 != 0) ]];
+              if [[ $(echo $file) == "update/"* ]];
                 then
-                    echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
-                    exit 1
+                    Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
+                    Pattern_2=$(cat $file|egrep -ic 'use database')
+                    if [[ $Pattern_1 != 0 || $Pattern_2 != 0  ]];
+                      then
+                        echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
+                        exit 1
+                    fi
               fi
             done
       - name: check pre-deploy script
