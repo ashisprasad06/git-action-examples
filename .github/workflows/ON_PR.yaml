@@ -35,6 +35,8 @@ jobs:
           fi
       - name: merge feature to preprod
         run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
           git checkout ${GITHUB_HEAD_REF}
           git pull
           git checkout ${{ steps.create_preprod_branch.outputs.preprod_branch }}
