@@ -2,52 +2,80 @@ name: ON PR
 on:
   pull_request:
     branches:
-      - preprod/**
       - main
+    paths:
+      - 'update/**'
+      - 'changelog.xml'
+      - 'pre-deploy/**'
+      - 'post-deploy/**'
+
 jobs:
-  pr_on_preprod_branch:
-    runs-on: ubuntu-latest
-    if: contains(github.base_ref, 'preprod')
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: check naming convention of source
-        run : |
-          src_branch_name=${GITHUB_HEAD_REF}
-          if [ $(echo $src_branch_name | grep -c 'feature/') != 1 ];
-            then
-              echo "Looks like the branch name does not follow naming convention standard as source to merge into release branch \n"
-              echo "Hence aborting this check. Please close this PR and either create new branch or rename existing new branch and raise new PR\n"
-              echo "Please follow naming standard of feature/<jira_ticket_number>"
-              exit 1
-          fi
-      - name: validate source and destination
-        run : |
-          src_branch_name=${GITHUB_HEAD_REF}
-          tgt_branch_name=${GITHUB_BASE_REF}
-
-          src_jira_ticket_num=$(echo $src_branch_name | awk -F"/" '{print $2}')
-          expected_tgt_branch_name="preprod/$src_jira_ticket_num"
-
-          if [ $expected_tgt_branch_name != $tgt_branch_name ];
-            then
-              echo "It looks the expected target is not correct. Please close this PR and raise another PR with correct target"
-              exit 1
-          fi
-
   pr_on_main_branch:
     runs-on: ubuntu-latest
-    if: contains(github.base_ref, 'main')
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: validate source branch
+        with:
+          fetch-depth: 0
+      - name: create preprod branch
+        id: create_preprod_branch
         run : |
-          src_branch_name=${GITHUB_HEAD_REF}
-          if [ $(echo $src_branch_name | grep -c 'preprod/') != 1 ];
+          SOURCE_BRANCH_NAME=${GITHUB_HEAD_REF}
+          JIRA_TICKET_NUMBER=$(echo $branch_name | awk -F"/" '{print $2}')
+          RELEASE_BRANCH_NAME="preprod/$(echo $JIRA_TICKET_NUMBER)"
+          echo "::set-output name=preprod_branch::$RELEASE_BRANCH_NAME"
+          echo "Checking $RELEASE_BRANCH_NAME existing or not"
+          if [ $(git ls-remote --heads origin $RELEASE_BRANCH_NAME|wc -l) == 0 ];
             then
-              echo "Looks like you are trying a PR from branch other than preprod/.This action is blocked\n"
-              echo "Hence failing this check. Please close this PR"
-              echo "Please select appropriate release branch which should look like this preprod/**"
-              exit 1
+                echo "The release branch $RELEASE_BRANCH_NAME does not exists in remote. Hence creating the new branch from master"
+                git fetch
+                git checkout -b $RELEASE_BRANCH_NAME origin/main
+                git push origin $RELEASE_BRANCH_NAME
+                echo "The new branch has been created. Please raise PR against this branch to merge changes to Pre-Prod"
           fi
+      - name: merge feature to preprod
+        run: |
+          git checkout ${{ steps.create_preprod_branch.outputs.preprod_branch }}
+          git pull
+          git merge --no-ff --no-commit ${GITHUB_HEAD_REF}
+          if [[ $? -ne 0 ]];
+            then
+                echo "the ${GITHUB_HEAD_REF} branch cannot be auto merged to ${{ create_preprod_branch.outputs.preprod_branch }}
+                exit 1
+          else
+            git merge ${GITHUB_HEAD_REF}
+            git push origin ${{ steps.create_preprod_branch.outputs.preprod_branch }}
+          fi
+      - name: List of changed files
+        id: changed_files
+        run: |
+          echo "List of the changed files"
+          git diff --name-only origin/main ${GITHUB_HEAD_REF}
+          git diff --name-only origin/main ${GITHUB_HEAD_REF} > files.txt
+          list_of_files=`cat files.txt|tr '\n' ' '`
+          echo "::set-output name=changed_files::$list_of_files"
+      - name: check database harcoding
+        run: |
+          for file in ${{ steps.changed_files.outputs.changed_files }}
+            do
+              Pattern_1=$(egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]' $file)
+              Pattern_2=$(egrep -ic 'use database' $file)
+
+              if [ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ];
+                then
+                    echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
+                    exit 1
+              fi
+            done
+      - name: check pre-deploy script
+        run: |
+          for file in ${{ steps.changed_files.outputs.changed_files }}
+            do
+              Pattern=$(cat file_2.txt|tr -d "\n"|egrep -ic 'DELETE FROM (.+)LIQUIBASE(.+)')
+              if [ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ];
+                then
+                    echo "Found Traces of liquidbase deletion in $file. Hence failing the check"
+                    exit 1
+              fi
+            done
+
