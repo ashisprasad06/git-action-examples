@@ -65,10 +65,10 @@ jobs:
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-              Pattern_1=$(egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]' $file)
-              Pattern_2=$(egrep -ic 'use database' $file)
+              Pattern_1=$(cat $file|egrep -ic '[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]')
+              Pattern_2=$(cat $file|egrep -ic 'use database')
 
-              if [ ( $Pattern_1 -ne 0 )  || ( $Pattern_2 -ne 0) ];
+              if [ $Pattern_1 != 0  || $Pattern_2 != 0 ];
                 then
                     echo "Found Traces of database hardcoding in the script $file. Hence failing the check"
                     exit 1
