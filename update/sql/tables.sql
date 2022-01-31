@@ -23,10 +23,15 @@ create table ${database_name}.${legacy_schema}.TBL_5 (
     col_j integer
 );
 
+create table ${database_name}.${legacy_schema}.TBL_6 (
+    col_l integer,
+    col_m integer
+);
+
 create table ${database_name}.${legacy_schema}.TBL_7 (
     col_x integer,
     col_y integer
-);
+ );
 
 create table ${database_name}.${legacy_schema}.TBL_8 (
     col_i integer,
