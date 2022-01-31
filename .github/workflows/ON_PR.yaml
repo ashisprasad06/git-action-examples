@@ -80,7 +80,7 @@ jobs:
         run: |
           for file in ${{ steps.changed_files.outputs.changed_files }}
             do
-              if [ $(echo $file) == "pre-deploy/"* || $(echo $file) == "post-deploy/"* ];
+              if [[ $(echo $file) == "pre-deploy/"* || $(echo $file) == "post-deploy/"* ]];
               then
                   Pattern=$(cat $file|tr -d "\n"|egrep -ic 'DELETE FROM (.+)LIQUIBASE(.+)')
                   if [[ $Pattern_1 -ne 0 || $Pattern_2 -ne 0 ]];
