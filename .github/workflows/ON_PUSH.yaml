@@ -1,0 +1,26 @@
+name: ON PR
+on:
+  push:
+    branches:
+      - main
+jobs:
+  push_on_main_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: clean preprod branch
+        id: clean_preprod_branch
+        run : |
+          last_commit_id=$(git log|head -1|sed 's/commit //')
+          source_branch_name=$(curl https://api.github.com/repos/ashisprasad06/git-action-examples/commits/${last_commit_id}/pulls| jq ".[0].head.ref)"
+          preprod_branch_name=$(echo $source_branch_name|sed 's/feature/preprod/')
+          if [ $(git ls-remote --heads origin $preprod_branch_name|wc -l) != 0 ];
+            then
+               git push origin --delete $preprod_branch_name
+          fi
+      - name: create draft release
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
