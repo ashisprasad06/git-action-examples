@@ -37,3 +37,8 @@ create table ${database_name}.${legacy_schema}.TBL_8 (
     col_i integer,
     col_j integer
 );
+
+create table ${database_name}.${legacy_schema}.TBL_9 (
+    col_k integer,
+    col_l integer
+);
