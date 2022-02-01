@@ -14,10 +14,14 @@ jobs:
         run : |
           last_commit_id=$(git log|head -1|sed 's/commit //')
           source_branch_name=$(curl https://api.github.com/repos/ashisprasad06/git-action-examples/commits/${last_commit_id}/pulls| jq ".[0].head.ref")
-          preprod_branch_name=$(echo $source_branch_name|sed 's/feature/preprod/')
+          preprod_branch_name=$(echo $source_branch_name|sed 's/"//g'|sed 's/feature/preprod/')
+          echo $preprod_branch_name
           if [ $(git ls-remote --heads origin $preprod_branch_name|wc -l) != 0 ];
             then
+               echo "Branch exists hence deleting the branch"
                git push origin --delete $preprod_branch_name
+          else
+            echo "Branch does not exists hence deleting the branch"
           fi
       - name: create draft release
         uses: release-drafter/release-drafter@v5
