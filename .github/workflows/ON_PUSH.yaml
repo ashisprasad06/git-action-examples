@@ -13,7 +13,7 @@ jobs:
         id: clean_preprod_branch
         run : |
           last_commit_id=$(git log|head -1|sed 's/commit //')
-          source_branch_name=$(curl https://api.github.com/repos/ashisprasad06/git-action-examples/commits/${last_commit_id}/pulls| jq ".[0].head.ref)"
+          source_branch_name=$(curl https://api.github.com/repos/ashisprasad06/git-action-examples/commits/${last_commit_id}/pulls| jq ".[0].head.ref")
           preprod_branch_name=$(echo $source_branch_name|sed 's/feature/preprod/')
           if [ $(git ls-remote --heads origin $preprod_branch_name|wc -l) != 0 ];
             then
