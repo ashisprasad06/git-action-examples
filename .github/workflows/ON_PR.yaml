@@ -90,4 +90,8 @@ jobs:
                   fi
               fi
             done
+      - name: cleanup preprod branch
+        if: github.event.pull_request.state == 'merged' || github.event.pull_request.state == 'closed'
+        run: |
+          git push origin --delete ${{ steps.create_preprod_branch.outputs.preprod_branch }}
 
