@@ -1,5 +1,6 @@
 name: ON PR
 on:
+  pull_request:
     branches:
       - main
     paths:
